@@ -1,3 +1,4 @@
+import random
 import sys
 import pygame
 
@@ -18,8 +19,12 @@ cloud_2 = pygame.image.load('assets/cloud_2.png')
 cloud1_1 = pygame.image.load('assets/cloud1_1.png')
 cloud2_1 = pygame.image.load('assets/cloud2_1.png')
 small_obs = pygame.image.load('assets/small_obs.png').convert_alpha()
+fly_obs = pygame.image.load('assets/obs_fly.png').convert_alpha()
+tall_obs = pygame.image.load('assets/obs_tall.png').convert_alpha()
 
 x_small_obs = 800
+x_fly_obs = 2500
+x_tall_obs = 1300
 
 x_cloud_2 = 390
 x_cloud_22 = 1190
@@ -37,6 +42,8 @@ score = 0
 
 player_rect = player.get_rect(topleft=(50, 320))
 small_obs_rect = small_obs.get_rect(topleft=(x_small_obs, 350))
+fly_obs_rect = fly_obs.get_rect(topleft=(x_fly_obs, 230))
+tall_obs_rect = fly_obs.get_rect(topleft=(x_tall_obs, 250))
 
 is_sliding = False
 
@@ -49,11 +56,28 @@ GAME_STATE = 1
 def move_scene():
     global xGround, xGround2, x_cloud_2, x_cloud_22, x_cloud1_1, x_cloud12_1, x_cloud2_1, x_cloud22_1, x_small_obs
 
+    if tall_obs_rect.x < -100:
+        tall_obs_rect.x = random.choice([1100,1200,1300,1400,1500,1600,1700,2000,2100,2200,2300,2400])
+        while tall_obs_rect.x - fly_obs_rect.x < 300:
+            tall_obs_rect.x += 400
+            print('talll')
+
+    if fly_obs_rect.x < -90 and not (tall_obs_rect.x < 800 & small_obs_rect.x < 800):
+        fly_obs_rect.x = random.choice([1100,1200,1300,1400,1500,1600,1700,2000,2100,2200,2300,2400,2500,2600,2700,2800,3000])
+        while fly_obs_rect.x - tall_obs_rect.x < 300:
+            fly_obs_rect.x += 500
+            print('flyyy')
+
     if small_obs_rect.x < -50:
-        small_obs_rect.x = 800
+        small_obs_rect.x = random.choice([800,900,1000,1100,1200,1300,1400,1500,1600])
+        while small_obs_rect.x - tall_obs_rect.x < 300:
+            small_obs_rect.x += 400
+            print('smalll')
 
     if GAME_STATE == 2:
         small_obs_rect.x -= 10
+        fly_obs_rect.x -= 10
+        tall_obs_rect.x -= 10
 
     if int(x_cloud2_1) == -250:
         x_cloud2_1 = 550
@@ -94,6 +118,8 @@ def start_play():
     run_index = 0
     score = 0
     small_obs_rect.x = 800
+    fly_obs_rect.x = 2500
+    tall_obs_rect.x = 1300
     player_rect = player.get_rect(topleft=(50, 320))
 
 
@@ -178,7 +204,7 @@ while True:
             if delay_double_jump == 0:
                 player = pygame.image.load('assets/player_jump.png').convert_alpha()
 
-        if player_rect.colliderect(small_obs_rect):
+        if player_rect.colliderect(small_obs_rect) or player_rect.colliderect(fly_obs_rect) or player_rect.colliderect(tall_obs_rect):
             GAME_STATE = 3
             player = pygame.image.load('assets/player_over.png').convert_alpha()
             is_sliding = False
@@ -188,6 +214,8 @@ while True:
 
     if GAME_STATE != 1:
         screen.blit(small_obs, small_obs_rect)
+        screen.blit(fly_obs, fly_obs_rect)
+        screen.blit(tall_obs, tall_obs_rect)
 
     if GAME_STATE < 3:
         if not is_sliding and jump_count == 0:
@@ -233,6 +261,7 @@ while True:
         if play_btn_rect.collidepoint(pygame.mouse.get_pos()):
             play_btn_rect = play_btn.get_rect(midtop=(400, 170))
             if pygame.mouse.get_pressed()[0]:
+                player = pygame.image.load('assets/player_walk_1.png').convert_alpha()
                 start_play()
                 GAME_STATE = 2
 
